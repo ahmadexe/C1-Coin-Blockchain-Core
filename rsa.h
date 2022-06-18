@@ -69,7 +69,7 @@ unsigned long long int generate_d(unsigned long long int e,unsigned long long in
     }
 }
 
-unsigned long long int ModArth(long long int base, long long int exponent, long long int mod) {
+unsigned long long int modArth(long long int base, long long int exponent, long long int mod) {
     if (mod == 1)
         return 0;
     int c = 1;
@@ -84,7 +84,7 @@ pair<string, vector<unsigned long long int>> cipher(string message, unsigned lon
     string ciphertext = "";
     for (int i = 0; i < message.length(); i++) {
         int c = message[i];
-        unsigned long long int ciphr = ModArth(c, e, n);
+        unsigned long long int ciphr = modArth(c, e, n);
         cipherVector.push_back(ciphr);
         ciphertext += to_string(ciphr);
     }
@@ -93,3 +93,12 @@ pair<string, vector<unsigned long long int>> cipher(string message, unsigned lon
     return {ciphertext, cipherVector};
 }
 
+string decipher(vector<unsigned long long int> cipherVector, unsigned long long int d, unsigned long long int n) {
+    string message = "";
+    for (int i = 0; i < cipherVector.size(); i++) {
+        unsigned long long int c = cipherVector[i];
+        unsigned long long int ciphr = modArth(c, d, n);
+        message += (char)ciphr;
+    }
+    return message;
+}
