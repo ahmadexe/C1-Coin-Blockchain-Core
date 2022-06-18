@@ -6,6 +6,14 @@ using namespace std;
 // m^e mod n = c
 // c^d mod n = m
 
+// m^e mod n = c
+// c^d mod n = m
+// encryption key = (n,e)
+// decryption key = (d)
+// n = p*q
+// phi = (p-1)*(q-1)
+
+
 int isPrime(unsigned long long int n)
 {
     if(n==2)
@@ -31,3 +39,57 @@ pair<unsigned long long int, unsigned long long int> generatePrimes() {
     pair<unsigned long long int, unsigned long long int> primes = make_pair(p,q);
     return primes;
 }
+
+unsigned long long int gcd(unsigned long long int a, unsigned long long int b)
+{
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+
+unsigned long long int generate_e(unsigned long long int phi)
+{
+    unsigned long long int e = 2;
+    int gcdv = 0;
+    while (gcdv != 1)
+    {
+        e++;
+        gcdv = gcd(e, phi);
+    }
+    return e;
+}
+
+unsigned long long int generate_d(unsigned long long int e,unsigned long long int phi) {
+    unsigned long long int d = 1;
+    while (1) {
+        unsigned long long int x = (e * d) % phi;
+        if (x == 1)
+            return d;
+        d++;
+    }
+}
+
+unsigned long long int ModArth(long long int base, long long int exponent, long long int mod) {
+    if (mod == 1)
+        return 0;
+    int c = 1;
+    for (int i = 0; i < exponent; i++) {
+        c = (c * base) % mod;
+    }
+    return c;
+}
+
+pair<string, vector<unsigned long long int>> cipher(string message, unsigned long long int e, unsigned long long int n) {
+    vector<unsigned long long int> cipherVector; 
+    string ciphertext = "";
+    for (int i = 0; i < message.length(); i++) {
+        int c = message[i];
+        unsigned long long int ciphr = ModArth(c, e, n);
+        cipherVector.push_back(ciphr);
+        ciphertext += to_string(ciphr);
+    }
+    srand(time(NULL));
+    random_shuffle(ciphertext.begin(), ciphertext.end());
+    return {ciphertext, cipherVector};
+}
+
