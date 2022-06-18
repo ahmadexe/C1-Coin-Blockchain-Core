@@ -13,7 +13,10 @@ using namespace std;
 // n = p*q
 // phi = (p-1)*(q-1)
 
-
+/*
+* Function to generate primes
+* @return pair<unsigned long long int, unsigned long long int>
+*/
 int isPrime(unsigned long long int n)
 {
     if(n==2)
@@ -40,6 +43,10 @@ pair<unsigned long long int, unsigned long long int> generatePrimes() {
     return primes;
 }
 
+/*
+* Function to generate e
+* @return unsigned long long int
+*/
 unsigned long long int gcd(unsigned long long int a, unsigned long long int b)
 {
     if (b == 0)
@@ -59,6 +66,10 @@ unsigned long long int generate_e(unsigned long long int phi)
     return e;
 }
 
+/*
+* Function to generate d
+* @return unsigned long long int
+*/
 unsigned long long int generate_d(unsigned long long int e,unsigned long long int phi) {
     unsigned long long int d = 1;
     while (1) {
@@ -69,6 +80,12 @@ unsigned long long int generate_d(unsigned long long int e,unsigned long long in
     }
 }
 
+
+/*
+* Function to cipher
+* Uses modular arithmetic ecponential rule to calculate values
+* @return pair<string, vector<unsigned long long int>>
+*/
 unsigned long long int modArth(long long int base, long long int exponent, long long int mod) {
     if (mod == 1)
         return 0;
@@ -93,6 +110,11 @@ pair<string, vector<unsigned long long int>> cipher(string message, unsigned lon
     return {ciphertext, cipherVector};
 }
 
+/*
+* Function to decipher
+* Uses modular arithmetic ecponential rule to calculate values
+* @return string
+*/
 string decipher(vector<unsigned long long int> cipherVector, unsigned long long int d, unsigned long long int n) {
     string message = "";
     for (int i = 0; i < cipherVector.size(); i++) {
