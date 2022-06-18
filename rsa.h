@@ -28,15 +28,15 @@ int isPrime(unsigned long long int n)
 
 pair<unsigned long long int, unsigned long long int> generatePrimes() {
     
-    int p,q;
+    unsigned long long int p,q;
     srand((unsigned int)time(0));
     do
     {
         p = rand() % 10000+1;
         q = rand() % 10000+1;
-    } while ((isPrime(p) && isPrime(q)) && (p != q));
+    } while (!isPrime(p) || !isPrime(q) || p==q);
     
-    pair<unsigned long long int, unsigned long long int> primes = make_pair(p,q);
+    pair<unsigned long long int, unsigned long long int> primes = {p,q};
     return primes;
 }
 
@@ -96,9 +96,9 @@ pair<string, vector<unsigned long long int>> cipher(string message, unsigned lon
 string decipher(vector<unsigned long long int> cipherVector, unsigned long long int d, unsigned long long int n) {
     string message = "";
     for (int i = 0; i < cipherVector.size(); i++) {
-        unsigned long long int c = cipherVector[i];
-        unsigned long long int ciphr = modArth(c, d, n);
-        message += (char)ciphr;
+        unsigned long long int m = modArth(cipherVector[i], d, n);
+        char append = (char)m;
+        message += append;
     }
     return message;
 }
