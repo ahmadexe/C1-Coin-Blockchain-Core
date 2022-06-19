@@ -169,7 +169,8 @@ int main(int argc, char const *argv[])
         cout << "1. Add block: " << endl;
         cout << "2. send amound" << endl;
         cout << "3. View" << endl;
-        cout << "4. exit" << endl;
+        cout << "4. Get hsitory" << endl;
+        cout << "5. Exit" << endl;
         cin >> choice;
         string buffer;
         getline(cin, buffer);
@@ -198,7 +199,18 @@ int main(int argc, char const *argv[])
         }
         else if (choice == 4)
         {
+            int privateKey;
+            cout << "Enter the private key: ";
+            cin >> privateKey;
+            getHistory(privateKey);
+        }
+        else if (choice == 5)
+        {
             break;
+        }
+        else
+        {
+            cerr << "Invalid choice" << endl;
         }
     }
 
