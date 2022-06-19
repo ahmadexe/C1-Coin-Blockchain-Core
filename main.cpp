@@ -134,7 +134,7 @@ void transact(int sender, int receiver, unsigned long long int amount)
     {
         coins[r->index] += amount;
         coins[sender] -= amount;
-        transaction[sender].push_back(make_pair(r->index, amount));
+        transaction[sender].push_back(make_pair(r->publicKey, amount));
     }
 }
 
@@ -151,10 +151,10 @@ void getHistory(int privateKey)
     }
     else
     {
-        cout << "History of " << temp->index << " " << coins[temp->index] << endl;
+        cout << "History of " << temp->index << ", Current balance " << coins[temp->index] << endl;
         for (auto i : transaction[temp->index])
         {
-            cout << "To " << i.first << " " << i.second << endl;
+            cout << "To " << i.first << ", Amount " << i.second << endl;
         }
     }
 }
