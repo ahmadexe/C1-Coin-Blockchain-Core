@@ -7,6 +7,7 @@
 using namespace std;
 
 const int N = 1e5;
+unsigned long long int coins[N];
 vector<pair<double,int>> networkDelay[N];
 vector<pair<int,int>> transaction[N];
 // index, delay, message, decryption key.
@@ -15,6 +16,7 @@ vector<pair<int, pair<int, pair<string, unsigned long long int>>>> message[N];
 struct Block
 {
     int index;
+    int publicKey;
     unsigned long long int COINS;
     string hash;
     string previousHash;
@@ -31,13 +33,14 @@ Block* tail = NULL;
 
 string toString(Block* b)
 {
-    return (to_string(b->index) + " " + b->previousHash +" " + b->data + " " + b->timestamp + " " + to_string(b->nonce));
+    return (to_string(b->index)+ " " + to_string(b->publicKey) + " " + b->previousHash +" " + b->data + " " + b->timestamp + " " + to_string(b->nonce));
 }
 
 void addGenesisBlock()
 {
     genesisBlock = new Block;
     genesisBlock->index = 0;
+    genesisBlock->publicKey = genesisBlock->index + 100;
     genesisBlock->COINS = 1000;
     genesisBlock->previousHash = "0";
     genesisBlock->data = "Genisis Block";
@@ -47,6 +50,8 @@ void addGenesisBlock()
     genesisBlock->previous = NULL;
     genesisBlock->hash = hashStr(toString(genesisBlock));
     tail = genesisBlock;
+    cout<<"Private key of genesis block: "<<genesisBlock->index<<endl;
+    cout<<"Public key of genesis block: "<<genesisBlock->publicKey<<endl;
 }
 
 int verifyNonce(int nonceLastBlock)
@@ -59,7 +64,9 @@ int verifyNonce(int nonceLastBlock)
 void creatBlock(string data) 
 {
     Block* newBlock = new Block;
+    newBlock->COINS = 0;
     newBlock->index = tail->index + 1;
+    newBlock->publicKey = newBlock->index + 100;
     newBlock->previousHash = tail->hash;
     newBlock->data = data;
     newBlock->timestamp = to_string(chrono::system_clock::now().time_since_epoch().count());
@@ -82,6 +89,8 @@ void creatBlock(string data)
     tail->next = newBlock;
     tail->nextHash = newBlock->hash;
     tail = newBlock;
+    cout<<"Private key of block: "<<newBlock->index<<endl;
+    cout<<"Public key of block: "<<newBlock->publicKey<<endl;
 }
 
 void printBlocks()
@@ -95,6 +104,27 @@ void printBlocks()
 }
 
 
+
+void transact(int sender, int receiver, unsigned long long int amount)
+{
+    Block* s = genesisBlock;
+    Block* r = genesisBlock;
+    while (s && s->index != sender) {
+        s = s->next;
+    }
+    while (r && r->publicKey != receiver) {
+        r = r->next;
+    }
+    if (!s) 
+    {
+        cerr<<"Invalid private key"<<endl;
+    }
+    if (!r)
+    {
+        cerr<<"Invalid receiver's public key"<<endl;
+    }
+
+}
 
 int main(int argc, char const *argv[])
 {
