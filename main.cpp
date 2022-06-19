@@ -9,11 +9,13 @@ using namespace std;
 const int N = 1e5;
 vector<pair<double,int>> networkDelay[N];
 vector<pair<int,int>> transaction[N];
-vector<pair<string, int>> message[N];
+// index, delay, message, decryption key.
+vector<pair<int, pair<int, pair<string, unsigned long long int>>>> message[N];
 
 struct Block
 {
     int index;
+    unsigned long long int COINS;
     string hash;
     string previousHash;
     string nextHash;
@@ -36,6 +38,7 @@ void addGenesisBlock()
 {
     genesisBlock = new Block;
     genesisBlock->index = 0;
+    genesisBlock->COINS = 1000;
     genesisBlock->previousHash = "0";
     genesisBlock->data = "Genisis Block";
     genesisBlock->timestamp = to_string(chrono::system_clock::now().time_since_epoch().count());
@@ -86,7 +89,7 @@ void printBlocks()
     Block* temp = genesisBlock;
     while(temp != NULL)
     {
-        cout<<"Block "<<temp->index<<"\n";
+        cout<<"Block "<<temp->index<<" ";
         temp = temp->next;
     }
 }
