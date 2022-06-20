@@ -9,9 +9,14 @@ using namespace std;
 const int N = 1e5;
 unsigned long long int coins[N];
 vector<pair<double, int>> networkDelay[N];
+double sumNetDelay = 0;
+vector<bool> visitedNetwokTraversal(N, false);
 vector<pair<int, int>> transaction[N];
-// index, delay, message, decryption key.
-vector<pair<int, pair<int, pair<string, unsigned long long int>>>> message[N];
+// sender, message, encryption vector, dec key.
+// vector<queue<pair<int ,pair<pair<string, vector<unsigned long long int>>, unsigned long long int>>>> messgaes[N];
+// vector < queue pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int> > > > > > messages[N];
+// Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
+vector < queue < pair < int, pair < pair < string, vector < unsigned long long int > >, pair < unsigned long long int, unsigned long long int > > > > > messagesVec[N];
 
 struct Block
 {
@@ -186,6 +191,114 @@ void getHistory(int privateKey)
     }
 }
 
+int getChainLength()
+{
+    int length = 0;
+    Block *temp = genesisBlock;
+    while (temp)
+    {
+        length++;
+        temp = temp->next;
+    }
+    return length;
+}   
+
+double getNetworkDelay(int genesisIndex)
+{
+    if (visitedNetwokTraversal[genesisIndex])
+    {
+        return 0.0;
+    }
+    visitedNetwokTraversal[genesisIndex] = true;
+    if (networkDelay[genesisIndex].size() == 0)
+    {
+        return 0.0;
+    }
+    sumNetDelay += networkDelay[genesisIndex][networkDelay[genesisIndex].size() - 1].first;
+    for (auto i : networkDelay[genesisIndex])
+    {
+        getNetworkDelay(i.second);
+    };
+    return sumNetDelay;
+}
+// index, delay, message, decryption key.
+
+void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
+{
+    Block *s = genesisBlock;
+    Block* r = genesisBlock;
+    while (s && s->index != senderPrivateKey)
+    {
+        s = s->next;
+    }
+    while (r && r->publicKey != receiverPublicKey)
+    {
+        r = r->next;
+    }
+    if (!s)
+    {
+        cerr << "Invalid private key" << endl;
+        return;
+    }
+    if (!r)
+    {
+        cerr << "Invalid receiver's public key" << endl;
+        return;
+    }
+    if (s == r)
+    {
+        cerr << "Sender and receiver are the same" << endl;
+        return;
+    }
+    unsigned long long int n,phi,e,d, p, q;
+    pair<unsigned long long int, unsigned long long int> primes = generatePrimes();
+    p = primes.first;
+    q = primes.second;
+    n = p * q;
+    phi = (p - 1) * (q - 1);
+    e = generate_e(phi);
+    d = generate_d(e, phi);
+
+    pair<string, vector<unsigned long long int>> cipherPair = cipher(message, e, n);
+    // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
+    // queue<pair<int, pair< pair < string, vector<unsigned long long int>>>> queue;
+    queue < pair < int, pair < pair < string, vector<unsigned long long int>>, pair < unsigned long long int, unsigned long long int>>>> queue;
+    queue.push({s->publicKey, {cipherPair, {d, n}}}); 
+    messagesVec[r->index].push_back(queue);
+}
+
+void receiveMessage(int receiverPrivateKey)
+{
+    Block *r = genesisBlock;
+    while (r && r->index != receiverPrivateKey)
+    {
+        r = r->next;
+    }
+    if (!r)
+    {
+        cerr << "Invalid private key" << endl;
+        return;
+    }
+    if (messagesVec[r->index].size() == 0)
+    {
+        cerr << "No messages" << endl;
+        return;
+    }
+    for (auto i : messagesVec[r->index])
+    {
+        while (!i.empty())
+        {
+            pair<int, pair< pair < string, vector<unsigned long long int>>, pair < unsigned long long int, unsigned long long int>>> temp = i.front();
+            i.pop();
+            pair<string, vector<unsigned long long int>> cipherPair = temp.second.first;
+            pair<unsigned long long int, unsigned long long int> dn = temp.second.second;
+            string message = decipher(cipherPair.second, dn.first, dn.second);
+            cout << "From " << temp.first << ": " << message << endl;
+        }
+    }
+    messagesVec->clear();
+}
+
 int main(int argc, char const *argv[])
 {
 
@@ -197,8 +310,9 @@ int main(int argc, char const *argv[])
         cout << "2. send amound" << endl;
         cout << "3. View" << endl;
         cout << "4. Get hsitory" << endl;
-        cout << "5. Validate chain" << endl;
-        cout << "6. Exit" << endl;
+        cout << "5. Send Message" << endl;
+        cout << "6. check Messages" << endl;
+        cout << "7. Exit" << endl;
         cin >> choice;
         string buffer;
         getline(cin, buffer);
@@ -234,14 +348,32 @@ int main(int argc, char const *argv[])
         }
         else if (choice == 5)
         {
-            // hack();
-            cout<<"----------------------------"<<endl;
-            cout<<validateChain()<<" Validation "<<endl;
-            cout<<"----------------------------"<<endl;
+            int senderPrivateKey, receiverPublicKey;
+            string message;
+            cout << "Enter the sender's private key: ";
+            cin >> senderPrivateKey;
+            cout << "Enter the receiver's public key: ";
+            cin >> receiverPublicKey;
+            string buffer2;
+            getline(cin, buffer2);
+            cout << "Enter the message: ";
+            getline(cin, message);
+            sendMessage(senderPrivateKey, receiverPublicKey, message);
         }
         else if (choice == 6)
         {
+            int privateKey;
+            cout << "Enter the private key: ";
+            cin >> privateKey;
+            receiveMessage(privateKey);
+        }
+        else if (choice == 7)
+        {
             break;
+        }
+        else
+        {
+            cout << "Invalid choice" << endl;
         }
     }
 
