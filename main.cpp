@@ -91,8 +91,35 @@ void creatBlock(string data)
     tail->next = newBlock;
     tail->nextHash = newBlock->hash;
     tail = newBlock;
+    cout<<"--------------------------"<<endl;
     cout << "Private key of block: " << newBlock->index << endl;
     cout << "Public key of block: " << newBlock->publicKey << endl;
+    cout<<"--------------------------"<<endl;
+}
+
+int validateChain()
+{
+    Block *temp = genesisBlock;
+    while (temp->next != NULL)
+    {
+        if (hashStr(toString(temp)) != temp->next->previousHash)
+        {
+            return 0;
+        }
+        if (temp->nextHash != hashStr(toString(temp->next)))
+        {
+            return 0;
+        }
+        temp = temp->next;
+    }
+    return 1;
+}
+
+// ! Only for testing purposes
+void hack()
+{
+    Block* temp = tail;
+    temp->data = "Hacked";
 }
 
 void printBlocks()
@@ -170,7 +197,8 @@ int main(int argc, char const *argv[])
         cout << "2. send amound" << endl;
         cout << "3. View" << endl;
         cout << "4. Get hsitory" << endl;
-        cout << "5. Exit" << endl;
+        cout << "5. Validate chain" << endl;
+        cout << "6. Exit" << endl;
         cin >> choice;
         string buffer;
         getline(cin, buffer);
@@ -206,11 +234,14 @@ int main(int argc, char const *argv[])
         }
         else if (choice == 5)
         {
-            break;
+            // hack();
+            cout<<"----------------------------"<<endl;
+            cout<<validateChain()<<" Validation "<<endl;
+            cout<<"----------------------------"<<endl;
         }
-        else
+        else if (choice == 6)
         {
-            cerr << "Invalid choice" << endl;
+            break;
         }
     }
 
