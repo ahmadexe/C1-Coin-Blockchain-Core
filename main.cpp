@@ -12,9 +12,6 @@ vector<pair<double, int>> networkDelay[N];
 double sumNetDelay = 0;
 vector<bool> visitedNetwokTraversal(N, false);
 vector<pair<int, int>> transaction[N];
-// sender, message, encryption vector, dec key.
-// vector<queue<pair<int ,pair<pair<string, vector<unsigned long long int>>, unsigned long long int>>>> messgaes[N];
-// vector < queue pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int> > > > > > messages[N];
 // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
 vector < queue < pair < int, pair < pair < string, vector < unsigned long long int > >, pair < unsigned long long int, unsigned long long int > > > > > messagesVec[N];
 
@@ -261,7 +258,6 @@ void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
 
     pair<string, vector<unsigned long long int>> cipherPair = cipher(message, e, n);
     // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
-    // queue<pair<int, pair< pair < string, vector<unsigned long long int>>>> queue;
     queue < pair < int, pair < pair < string, vector<unsigned long long int>>, pair < unsigned long long int, unsigned long long int>>>> queue;
     queue.push({s->publicKey, {cipherPair, {d, n}}}); 
     messagesVec[r->index].push_back(queue);
@@ -280,6 +276,11 @@ void receiveMessage(int receiverPrivateKey)
         return;
     }
     if (messagesVec[r->index].size() == 0)
+    {
+        cerr << "No messages" << endl;
+        return;
+    }
+    if (messagesVec[r->index][messagesVec[r->index].size() - 1].size() == 0)
     {
         cerr << "No messages" << endl;
         return;
