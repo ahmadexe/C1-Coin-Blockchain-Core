@@ -185,14 +185,17 @@ void transact(int sender, int receiver, unsigned long long int amount)
     if (!s)
     {
         cerr << "Invalid private key" << endl;
+        return;
     }
     if (!r)
     {
         cerr << "Invalid receiver's public key" << endl;
+        return;
     }
     if (coins[sender] < amount)
     {
         cerr << "Insufficient balance" << endl;
+        return;
     }
     else
     {
@@ -220,6 +223,23 @@ void getHistory(int privateKey)
         {
             cout << "To " << i.first << ", Amount " << i.second << endl;
         }
+    }
+}
+
+void viewBalanceOnBlock(int privateKey)
+{
+    Block *temp = genesisBlock;
+    while (temp && temp->index != privateKey)
+    {
+        temp = temp->next;
+    }
+    if (!temp)
+    {
+        cerr << "Invalid private key" << endl;
+    }
+    else
+    {
+        cout << coins[privateKey];
     }
 }
 
