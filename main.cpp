@@ -138,12 +138,33 @@ void viewHashes()
     cout<<endl;
 }
 
+void viewHashOfBlock(int privateKey)
+{
+    Block* temp = genesisBlock;
+    while (temp && temp->index != privateKey)
+    {
+        temp = temp->next;
+    }
+    if (temp)
+    {
+        cout<<"--------------------------------"<<endl;
+        cout<<temp->hash<<endl;
+        cout<<"--------------------------------"<<endl;
+    }
+    else
+    {
+        cout<<endl;
+        cout<<"Invalid private key"<<endl;
+        cout<<endl;
+    }
+}
+
 void printBlocks()
 {
     Block *temp = genesisBlock;
     while (temp != NULL)
     {
-        cout << "Block " << temp->index << " ";
+        cout << "Block " << temp->publicKey << " ";
         cout << coins[temp->index] << endl;
         temp = temp->next;
     }
@@ -309,7 +330,7 @@ void receiveMessage(int receiverPrivateKey)
             pair<unsigned long long int, unsigned long long int> dn = temp.second.second;
             string cipherText = cipherPair.first;
             string message = decipher(cipherPair.second, dn.first, dn.second);
-            cout<<"----------------------------------------------------------"<<endl;
+            cout<<"----------------------------------------------------------"<<endl<<endl;
             cout << "From " << temp.first << ": Ciphered Text: "<<cipherText<<endl<<endl;
             cout << "From " << temp.first << ": Original Text: " << message << endl<<endl;
             cout<<"----------------------------------------------------------"<<endl;
@@ -322,85 +343,156 @@ int main(int argc, char const *argv[])
 {
 
     addGenesisBlock();
+    // while (true)
+    // {
+    //     int choice;
+    //     cout << "1. Add block: " << endl;
+    //     cout << "2. send amound" << endl;
+    //     cout << "3. View" << endl;
+    //     cout << "4. Get hsitory" << endl;
+    //     cout << "5. Send Message" << endl;
+    //     cout << "6. check Messages" << endl;
+    //     cout << "7. Hash" << endl;
+    //     cout << "8. Validate" << endl;
+    //     cout << "9. Exit" << endl;
+    //     cin >> choice;
+    //     string buffer;
+    //     getline(cin, buffer);
+    //     if (choice == 1)
+    //     {
+    //         string data;
+    //         cout << "Enter the data: ";
+    //         getline(cin, data);
+    //         creatBlock(data);
+    //     }
+    //     else if (choice == 2)
+    //     {
+    //         int sender, receiver;
+    //         unsigned long long int amount;
+    //         cout << "Enter the sender's private key: ";
+    //         cin >> sender;
+    //         cout << "Enter the receiver's public key: ";
+    //         cin >> receiver;
+    //         cout << "Enter the amount: ";
+    //         cin >> amount;
+    //         transact(sender, receiver, amount);
+    //     }
+    //     else if (choice == 3)
+    //     {
+    //         printBlocks();
+    //     }
+    //     else if (choice == 4)
+    //     {
+    //         int privateKey;
+    //         cout << "Enter the private key: ";
+    //         cin >> privateKey;
+    //         getHistory(privateKey);
+    //     }
+    //     else if (choice == 5)
+    //     {
+    //         int senderPrivateKey, receiverPublicKey;
+    //         string message;
+    //         cout << "Enter the sender's private key: ";
+    //         cin >> senderPrivateKey;
+    //         cout << "Enter the receiver's public key: ";
+    //         cin >> receiverPublicKey;
+    //         string buffer2;
+    //         getline(cin, buffer2);
+    //         cout << "Enter the message: ";
+    //         getline(cin, message);
+    //         sendMessage(senderPrivateKey, receiverPublicKey, message);
+    //     }
+    //     else if (choice == 6)
+    //     {
+    //         int privateKey;
+    //         cout << "Enter the private key: ";
+    //         cin >> privateKey;
+    //         receiveMessage(privateKey);
+    //     }
+    //     else if (choice == 7)
+    //     {
+    //         viewHashes();
+    //     }
+    //     else if (choice == 8)
+    //     {
+    //         cout<< "Validation Status: " <<validateChain() << endl;
+    //     }
+    //     else if (choice == 9)
+    //     {
+    //         break;
+    //     }
+    // }
+
     while (true)
     {
         int choice;
-        cout << "1. Add block: " << endl;
-        cout << "2. send amound" << endl;
-        cout << "3. View" << endl;
-        cout << "4. Get hsitory" << endl;
-        cout << "5. Send Message" << endl;
-        cout << "6. check Messages" << endl;
-        cout << "7. Hash" << endl;
-        cout << "8. Validate" << endl;
-        cout << "9. Exit" << endl;
+
+        cout << "1. Add block." << endl;
+        cout << "2. View All hashes." <<endl;
+        cout << "3. View hash of a block." << endl;
+        cout << "4. Validate blockchain." << endl;
+        cout << "5. Make deposit." << endl;
+        cout << "6. Get history of transactions on a block." << endl;
+        cout << "7. View average time to find a block." << endl;
+        cout << "8. Get total network since the formation of genesis block" << endl;
+        cout << "9. Send a message." << endl;
+        cout << "10. View all messages at a block" << endl;
+        cout << "11. Alter a block" << endl;
+        cout << "12. View all blocks" << endl;
+        cout << "13. Exit " << endl;
+
         cin >> choice;
         string buffer;
         getline(cin, buffer);
+        
         if (choice == 1)
         {
             string data;
-            cout << "Enter the data: ";
+            cout << "Enter a unique data: ";
             getline(cin, data);
             creatBlock(data);
         }
+
         else if (choice == 2)
         {
-            int sender, receiver;
-            unsigned long long int amount;
-            cout << "Enter the sender's private key: ";
-            cin >> sender;
-            cout << "Enter the receiver's public key: ";
-            cin >> receiver;
-            cout << "Enter the amount: ";
-            cin >> amount;
-            transact(sender, receiver, amount);
+            cout << endl;
+            viewHashes();
+            cout << endl;
         }
+
         else if (choice == 3)
         {
-            printBlocks();
+            cout<<endl;
+            int privateKey;
+            cout << "Enter private key of the block: ";
+            cin>>privateKey; 
+            viewHashOfBlock(privateKey);
+            cout<<endl;
         }
+
         else if (choice == 4)
         {
-            int privateKey;
-            cout << "Enter the private key: ";
-            cin >> privateKey;
-            getHistory(privateKey);
+            cout << endl;
+            int validateVal;
+            validateVal = validateChain();
+            if (validateVal)
+            {
+                cout << "The chain is valid" << endl;
+            }
+            else
+            {
+                cout << "The chain has been corrupted" << endl;
+            }
+            cout << endl;
         }
-        else if (choice == 5)
+
+        else if(choice == 5)
         {
-            int senderPrivateKey, receiverPublicKey;
-            string message;
-            cout << "Enter the sender's private key: ";
-            cin >> senderPrivateKey;
-            cout << "Enter the receiver's public key: ";
-            cin >> receiverPublicKey;
-            string buffer2;
-            getline(cin, buffer2);
-            cout << "Enter the message: ";
-            getline(cin, message);
-            sendMessage(senderPrivateKey, receiverPublicKey, message);
+            cout << endl;
         }
-        else if (choice == 6)
-        {
-            int privateKey;
-            cout << "Enter the private key: ";
-            cin >> privateKey;
-            receiveMessage(privateKey);
-        }
-        else if (choice == 7)
-        {
-            viewHashes();
-        }
-        else if (choice == 8)
-        {
-            cout<< "Validation Status: " <<validateChain() << endl;
-        }
-        else if (choice == 9)
-        {
-            break;
-        }
+
     }
+    
 
     return 0;
 }
