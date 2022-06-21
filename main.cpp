@@ -307,8 +307,12 @@ void receiveMessage(int receiverPrivateKey)
             i.pop();
             pair<string, vector<unsigned long long int>> cipherPair = temp.second.first;
             pair<unsigned long long int, unsigned long long int> dn = temp.second.second;
+            string cipherText = cipherPair.first;
             string message = decipher(cipherPair.second, dn.first, dn.second);
-            cout << "From " << temp.first << ": " << message << endl;
+            cout<<"----------------------------------------------------------"<<endl;
+            cout << "From " << temp.first << ": Ciphered Text: "<<cipherText<<endl<<endl;
+            cout << "From " << temp.first << ": Original Text: " << message << endl<<endl;
+            cout<<"----------------------------------------------------------"<<endl;
         }
     }
     messagesVec->clear();
