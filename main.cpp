@@ -124,6 +124,20 @@ void hack()
     temp->data = "Hacked";
 }
 
+void viewHashes()
+{
+    Block* temp = genesisBlock;
+    while (temp)
+    {
+        cout<<"--------------------------"<<endl;
+        cout << "Hash of block: " << temp->index << endl;
+        cout << "Hash: " << temp->hash << endl;
+        cout<<"--------------------------"<<endl;
+        temp = temp->next;
+    }
+    cout<<endl;
+}
+
 void printBlocks()
 {
     Block *temp = genesisBlock;
@@ -313,7 +327,9 @@ int main(int argc, char const *argv[])
         cout << "4. Get hsitory" << endl;
         cout << "5. Send Message" << endl;
         cout << "6. check Messages" << endl;
-        cout << "7. Exit" << endl;
+        cout << "7. Hash" << endl;
+        cout << "8. Validate" << endl;
+        cout << "9. Exit" << endl;
         cin >> choice;
         string buffer;
         getline(cin, buffer);
@@ -370,11 +386,15 @@ int main(int argc, char const *argv[])
         }
         else if (choice == 7)
         {
-            break;
+            viewHashes();
         }
-        else
+        else if (choice == 8)
         {
-            cout << "Invalid choice" << endl;
+            cout<< "Validation Status: " <<validateChain() << endl;
+        }
+        else if (choice == 9)
+        {
+            break;
         }
     }
 
