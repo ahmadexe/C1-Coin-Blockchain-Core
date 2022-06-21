@@ -13,7 +13,7 @@ double sumNetDelay = 0;
 vector<bool> visitedNetwokTraversal(N, false);
 vector<pair<int, int>> transaction[N];
 // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
-vector < queue < pair < int, pair < pair < string, vector < unsigned long long int > >, pair < unsigned long long int, unsigned long long int > > > > > messagesVec[N];
+vector<queue<pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int>>>>> messagesVec[N];
 
 struct Block
 {
@@ -93,10 +93,10 @@ void creatBlock(string data)
     tail->next = newBlock;
     tail->nextHash = newBlock->hash;
     tail = newBlock;
-    cout<<"--------------------------"<<endl;
+    cout << "--------------------------" << endl;
     cout << "Private key of block: " << newBlock->index << endl;
     cout << "Public key of block: " << newBlock->publicKey << endl;
-    cout<<"--------------------------"<<endl;
+    cout << "--------------------------" << endl;
 }
 
 int validateChain()
@@ -120,42 +120,42 @@ int validateChain()
 // ! Only for testing purposes
 void hack()
 {
-    Block* temp = tail;
+    Block *temp = tail;
     temp->data = "Hacked";
 }
 
 void viewHashes()
 {
-    Block* temp = genesisBlock;
+    Block *temp = genesisBlock;
     while (temp)
     {
-        cout<<"--------------------------"<<endl;
+        cout << "--------------------------" << endl;
         cout << "Hash of block: " << temp->index << endl;
         cout << "Hash: " << temp->hash << endl;
-        cout<<"--------------------------"<<endl;
+        cout << "--------------------------" << endl;
         temp = temp->next;
     }
-    cout<<endl;
+    cout << endl;
 }
 
 void viewHashOfBlock(int privateKey)
 {
-    Block* temp = genesisBlock;
+    Block *temp = genesisBlock;
     while (temp && temp->index != privateKey)
     {
         temp = temp->next;
     }
     if (temp)
     {
-        cout<<"--------------------------------"<<endl;
-        cout<<temp->hash<<endl;
-        cout<<"--------------------------------"<<endl;
+        cout << "--------------------------------" << endl;
+        cout << temp->hash << endl;
+        cout << "--------------------------------" << endl;
     }
     else
     {
-        cout<<endl;
-        cout<<"Invalid private key"<<endl;
-        cout<<endl;
+        cout << endl;
+        cout << "Invalid private key" << endl;
+        cout << endl;
     }
 }
 
@@ -253,7 +253,7 @@ int getChainLength()
         temp = temp->next;
     }
     return length;
-}   
+}
 
 double getNetworkDelay(int genesisIndex)
 {
@@ -278,7 +278,7 @@ double getNetworkDelay(int genesisIndex)
 void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
 {
     Block *s = genesisBlock;
-    Block* r = genesisBlock;
+    Block *r = genesisBlock;
     while (s && s->index != senderPrivateKey)
     {
         s = s->next;
@@ -302,7 +302,7 @@ void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
         cerr << "Sender and receiver are the same" << endl;
         return;
     }
-    unsigned long long int n,phi,e,d, p, q;
+    unsigned long long int n, phi, e, d, p, q;
     pair<unsigned long long int, unsigned long long int> primes = generatePrimes();
     p = primes.first;
     q = primes.second;
@@ -313,8 +313,8 @@ void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
 
     pair<string, vector<unsigned long long int>> cipherPair = cipher(message, e, n);
     // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
-    queue < pair < int, pair < pair < string, vector<unsigned long long int>>, pair < unsigned long long int, unsigned long long int>>>> queue;
-    queue.push({s->publicKey, {cipherPair, {d, n}}}); 
+    queue<pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int>>>> queue;
+    queue.push({s->publicKey, {cipherPair, {d, n}}});
     messagesVec[r->index].push_back(queue);
 }
 
@@ -344,16 +344,19 @@ void receiveMessage(int receiverPrivateKey)
     {
         while (!i.empty())
         {
-            pair<int, pair< pair < string, vector<unsigned long long int>>, pair < unsigned long long int, unsigned long long int>>> temp = i.front();
+            pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int>>> temp = i.front();
             i.pop();
             pair<string, vector<unsigned long long int>> cipherPair = temp.second.first;
             pair<unsigned long long int, unsigned long long int> dn = temp.second.second;
             string cipherText = cipherPair.first;
             string message = decipher(cipherPair.second, dn.first, dn.second);
-            cout<<"----------------------------------------------------------"<<endl<<endl;
-            cout << "From " << temp.first << ": Ciphered Text: "<<cipherText<<endl<<endl;
-            cout << "From " << temp.first << ": Original Text: " << message << endl<<endl;
-            cout<<"----------------------------------------------------------"<<endl;
+            cout << "----------------------------------------------------------" << endl
+                 << endl;
+            cout << "From " << temp.first << ": Ciphered Text: " << cipherText << endl
+                 << endl;
+            cout << "From " << temp.first << ": Original Text: " << message << endl
+                 << endl;
+            cout << "----------------------------------------------------------" << endl;
         }
     }
     messagesVec->clear();
@@ -448,23 +451,24 @@ int main(int argc, char const *argv[])
         int choice;
 
         cout << "1. Add block." << endl;
-        cout << "2. View All hashes." <<endl;
+        cout << "2. View All hashes." << endl;
         cout << "3. View hash of a block." << endl;
         cout << "4. Validate blockchain." << endl;
         cout << "5. Make deposit." << endl;
-        cout << "6. Get history of transactions on a block." << endl;
-        cout << "7. View average time to find a block." << endl;
-        cout << "8. Get total network since the formation of genesis block" << endl;
-        cout << "9. Send a message." << endl;
-        cout << "10. View all messages at a block" << endl;
-        cout << "11. Alter a block" << endl;
-        cout << "12. View all blocks" << endl;
-        cout << "13. Exit " << endl;
+        cout << "6. View coins in a block" << endl;
+        cout << "7. Get history of transactions on a block." << endl;
+        cout << "8. View average time to find a block." << endl;
+        cout << "9. Get total network since the formation of genesis block" << endl;
+        cout << "10. Send a message." << endl;
+        cout << "11. View all messages at a block" << endl;
+        cout << "12. Alter a block" << endl;
+        cout << "13. View all blocks" << endl;
+        cout << "14. Exit " << endl;
 
         cin >> choice;
         string buffer;
         getline(cin, buffer);
-        
+
         if (choice == 1)
         {
             string data;
@@ -482,12 +486,12 @@ int main(int argc, char const *argv[])
 
         else if (choice == 3)
         {
-            cout<<endl;
+            cout << endl;
             int privateKey;
             cout << "Enter private key of the block: ";
-            cin>>privateKey; 
+            cin >> privateKey;
             viewHashOfBlock(privateKey);
-            cout<<endl;
+            cout << endl;
         }
 
         else if (choice == 4)
@@ -506,13 +510,107 @@ int main(int argc, char const *argv[])
             cout << endl;
         }
 
-        else if(choice == 5)
+        else if (choice == 5)
         {
+            cout << endl;
+            int sender, receiver;
+            unsigned long long int amount;
+            cout << "Enter the sender's private key: ";
+            cin >> sender;
+            cout << "Enter the receiver's public key: ";
+            cin >> receiver;
+            cout << "Enter the amount: ";
+            cin >> amount;
+            transact(sender, receiver, amount);
             cout << endl;
         }
 
+        else if (choice == 6)
+        {
+            cout << endl;
+            int privateKey;
+            cout << "Enter the sender's private key: ";
+            cin >> privateKey;
+            viewBalanceOnBlock(privateKey);
+            cout << endl;
+        }
+
+        else if (choice == 7)
+        {
+            cout << endl;
+            int privateKey;
+            cout << "Enter the sender's private key: ";
+            cin >> privateKey;
+            getHistory(privateKey);
+            cout << endl;
+        }
+
+        else if (choice == 8)
+        {
+            cout << endl;
+            cout << "Average time to find a block: " << (getNetworkDelay(0) / getChainLength()) << endl;
+            cout << endl;
+        }
+
+        else if (choice == 9)
+        {
+            cout << endl;
+            cout << "Total network since the formation of genesis block: " << getNetworkDelay(0) << endl;
+            cout << endl;
+        }
+
+        else if (choice == 10)
+        {
+            cout << endl;
+            int senderPrivateKey, receiverPublicKey;
+            string message;
+            cout << "Enter the sender's private key: ";
+            cin >> senderPrivateKey;
+            cout << "Enter the receiver's public key: ";
+            cin >> receiverPublicKey;
+            string buffer2;
+            getline(cin, buffer2);
+            cout << "Enter the message: ";
+            getline(cin, message);
+            sendMessage(senderPrivateKey, receiverPublicKey, message);
+            cout << endl;
+        }
+
+        else if (choice == 11)
+        {
+            cout << endl;
+            int privateKey;
+            cout << "Enter the private key: ";
+            cin >> privateKey;
+            receiveMessage(privateKey);
+            cout << endl;
+        }
+
+        else if (choice == 12)
+        {
+            cout << endl;
+            hack();
+            cout << "Blocks altered" << endl;
+            cout << endl;
+        }
+
+        else if (choice == 13)
+        {
+            printBlocks();
+        }
+
+        else if (choice == 14)
+        {
+            break;
+        }
+
+        else
+        {
+            cout << endl;
+            cout << "Invalid choice" << endl;
+            cout << endl;
+        }
     }
-    
 
     return 0;
 }
