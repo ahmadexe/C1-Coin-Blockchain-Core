@@ -18,7 +18,6 @@ vector<pair<int, unsigned long long int>> transaction[N];
 // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
 vector<queue<pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int>>>>> messagesVec[N];
 
-
 // Structure for every block in the blockchain.
 struct Block
 {
@@ -62,10 +61,11 @@ void addGenesisBlock()
     genesisBlock->previous = NULL;
     genesisBlock->hash = hashStr(toString(genesisBlock));
     tail = genesisBlock;
-    cout<<endl<<"------------------------------------"<<endl;
+    cout << endl
+         << "------------------------------------" << endl;
     cout << "Private key of genesis block: " << genesisBlock->index << endl;
     cout << "Public key of genesis block: " << genesisBlock->publicKey << endl;
-    cout<<"------------------------------------"<<endl;
+    cout << "------------------------------------" << endl;
 }
 
 // Method to verify the nonce,
@@ -254,7 +254,13 @@ void transact(int sender, int receiver, unsigned long long int amount)
     generateCoinBalance();
     if (coins[sender] < amount)
     {
-        cerr << "Insufficient balance" << endl;
+        cout << "Insufficient balance" << endl;
+        cout << coins[sender] << endl;
+        for (int i = 0; i < N; i++)
+        {
+            coins[i] = 0;
+        }
+        coins[0] = 1000;
         return;
     }
 
