@@ -6,15 +6,20 @@
 
 using namespace std;
 
+// Declarations
+
 const int N = 1e5;
-unsigned long long int coins[N];
-vector<pair<double, int>> networkDelay[N];
 double sumNetDelay = 0;
+
+unsigned long long int coins[N];
 vector<bool> visitedNetwokTraversal(N, false);
-vector<pair<int, int>> transaction[N];
+vector<pair<double, int>> networkDelay[N];
+vector<pair<int, unsigned long long int>> transaction[N];
 // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
 vector<queue<pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int>>>>> messagesVec[N];
 
+
+// Structure for every block in the blockchain.
 struct Block
 {
     int index;
@@ -33,10 +38,14 @@ struct Block
 Block *genesisBlock = NULL;
 Block *tail = NULL;
 
+// Converts block data into string so that it can be hashed later
+
 string toString(Block *b)
 {
     return (to_string(b->index) + " " + to_string(b->publicKey) + " " + b->previousHash + " " + b->data + " " + b->timestamp + " " + to_string(b->nonce));
 }
+
+// Hard coded method that adds the genesis block
 
 void addGenesisBlock()
 {
@@ -53,9 +62,14 @@ void addGenesisBlock()
     genesisBlock->previous = NULL;
     genesisBlock->hash = hashStr(toString(genesisBlock));
     tail = genesisBlock;
+    cout<<endl<<"------------------------------------"<<endl;
     cout << "Private key of genesis block: " << genesisBlock->index << endl;
     cout << "Public key of genesis block: " << genesisBlock->publicKey << endl;
+    cout<<"------------------------------------"<<endl;
 }
+
+// Method to verify the nonce,
+// Helps find a block
 
 int verifyNonce(int nonceLastBlock)
 {
@@ -63,6 +77,8 @@ int verifyNonce(int nonceLastBlock)
     int random = (rand() % (nonceLastBlock + 2));
     return random;
 }
+
+// Method to create a block
 
 void creatBlock(string data)
 {
@@ -74,6 +90,9 @@ void creatBlock(string data)
     newBlock->data = data;
     newBlock->timestamp = to_string(chrono::system_clock::now().time_since_epoch().count());
     newBlock->nonce = tail->nonce + 1;
+
+    // The following loop finds a block. Notes the time and add that to delays array.
+
     auto start = chrono::steady_clock::now();
 
     int checkNonce = verifyNonce(tail->nonce);
@@ -81,7 +100,9 @@ void creatBlock(string data)
     {
         checkNonce = verifyNonce(tail->nonce);
     } while (checkNonce != newBlock->nonce);
+
     auto end = chrono::steady_clock::now();
+
     double elapsedTime = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
     elapsedTime = elapsedTime / 1e9;
 
@@ -93,11 +114,18 @@ void creatBlock(string data)
     tail->next = newBlock;
     tail->nextHash = newBlock->hash;
     tail = newBlock;
+
+    // Outputs the public and private keys of blocks
+    // The private keys start from 0, (Genisis block's)
+    // The public keys start from 100, (Genisis block's)
+
     cout << "--------------------------" << endl;
     cout << "Private key of block: " << newBlock->index << endl;
     cout << "Public key of block: " << newBlock->publicKey << endl;
     cout << "--------------------------" << endl;
 }
+
+// Calculates and comapare the hashes to validate the chain.
 
 int validateChain()
 {
@@ -118,11 +146,14 @@ int validateChain()
 }
 
 // ! Only for testing purposes
+// ! Tests if validation is working fine
 void hack()
 {
     Block *temp = tail;
     temp->data = "Hacked";
 }
+
+// Method to view all hashes
 
 void viewHashes()
 {
@@ -137,6 +168,8 @@ void viewHashes()
     }
     cout << endl;
 }
+
+// View hash of a particular block.
 
 void viewHashOfBlock(int privateKey)
 {
@@ -159,16 +192,42 @@ void viewHashOfBlock(int privateKey)
     }
 }
 
+// Prints the chain.
+
 void printBlocks()
 {
     Block *temp = genesisBlock;
+    cout << endl;
+    cout << "--------------------------------" << endl;
     while (temp != NULL)
     {
         cout << "Block " << temp->publicKey << " ";
         cout << coins[temp->index] << endl;
         temp = temp->next;
     }
+    cout << "--------------------------------" << endl;
 }
+
+// Methods that obtains the block balance.
+
+void makeBalance(int source)
+{
+    for (auto child : transaction[source])
+    {
+        coins[child.first] += child.second;
+        coins[source] -= child.second;
+    }
+}
+
+void generateCoinBalance()
+{
+    for (int i = 0; i < N; i++)
+    {
+        makeBalance(i);
+    }
+}
+
+// Sends coin to the receiver, first time can only be called at genesis block.
 
 void transact(int sender, int receiver, unsigned long long int amount)
 {
@@ -192,18 +251,25 @@ void transact(int sender, int receiver, unsigned long long int amount)
         cerr << "Invalid receiver's public key" << endl;
         return;
     }
+    generateCoinBalance();
     if (coins[sender] < amount)
     {
         cerr << "Insufficient balance" << endl;
         return;
     }
+
     else
     {
-        coins[r->index] += amount;
-        coins[sender] -= amount;
-        transaction[sender].push_back(make_pair(r->publicKey, amount));
+        transaction[sender].push_back(make_pair(r->index, amount));
     }
+    for (int i = 0; i < N; i++)
+    {
+        coins[i] = 0;
+    }
+    coins[0] = 1000;
 }
+
+// Gets history of all the transactions made from a block.
 
 void getHistory(int privateKey)
 {
@@ -221,10 +287,12 @@ void getHistory(int privateKey)
         cout << "History of " << temp->index << ", Current balance " << coins[temp->index] << endl;
         for (auto i : transaction[temp->index])
         {
-            cout << "To " << i.first << ", Amount " << i.second << endl;
+            cout << "To " << (i.first + 100) << ", Amount " << i.second << endl;
         }
     }
 }
+
+// View the balance on a single block.
 
 void viewBalanceOnBlock(int privateKey)
 {
@@ -243,6 +311,8 @@ void viewBalanceOnBlock(int privateKey)
     }
 }
 
+// Chains length.
+
 int getChainLength()
 {
     int length = 0;
@@ -254,6 +324,9 @@ int getChainLength()
     }
     return length;
 }
+
+// Get the delay in findind blocks.
+// (Time taken in searching blocks.)
 
 double getNetworkDelay(int genesisIndex)
 {
@@ -273,7 +346,9 @@ double getNetworkDelay(int genesisIndex)
     };
     return sumNetDelay;
 }
-// index, delay, message, decryption key.
+
+// index, delay, message, decryption key. (Format messagesVec)
+// Send messages to receiver.
 
 void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
 {
@@ -302,19 +377,27 @@ void sendMessage(int senderPrivateKey, int receiverPublicKey, string message)
         cerr << "Sender and receiver are the same" << endl;
         return;
     }
+
+    // RSA Variables.
     unsigned long long int n, phi, e, d, p, q;
+    // Method to generate primes of the power 1e5
     pair<unsigned long long int, unsigned long long int> primes = generatePrimes();
     p = primes.first;
     q = primes.second;
     n = p * q;
     phi = (p - 1) * (q - 1);
+    // generates encryption key.
     e = generate_e(phi);
+    // generates decryption key.
     d = generate_d(e, phi);
 
+    // Encrypts message.
     pair<string, vector<unsigned long long int>> cipherPair = cipher(message, e, n);
     // Queue, {sender's public key, { {ciphered message, vector}, {d, n}}}
     queue<pair<int, pair<pair<string, vector<unsigned long long int>>, pair<unsigned long long int, unsigned long long int>>>> queue;
+    // Pushes into the messaging queue.
     queue.push({s->publicKey, {cipherPair, {d, n}}});
+    // Pushes the queue to the message vector.
     messagesVec[r->index].push_back(queue);
 }
 
@@ -366,85 +449,6 @@ int main(int argc, char const *argv[])
 {
 
     addGenesisBlock();
-    // while (true)
-    // {
-    //     int choice;
-    //     cout << "1. Add block: " << endl;
-    //     cout << "2. send amound" << endl;
-    //     cout << "3. View" << endl;
-    //     cout << "4. Get hsitory" << endl;
-    //     cout << "5. Send Message" << endl;
-    //     cout << "6. check Messages" << endl;
-    //     cout << "7. Hash" << endl;
-    //     cout << "8. Validate" << endl;
-    //     cout << "9. Exit" << endl;
-    //     cin >> choice;
-    //     string buffer;
-    //     getline(cin, buffer);
-    //     if (choice == 1)
-    //     {
-    //         string data;
-    //         cout << "Enter the data: ";
-    //         getline(cin, data);
-    //         creatBlock(data);
-    //     }
-    //     else if (choice == 2)
-    //     {
-    //         int sender, receiver;
-    //         unsigned long long int amount;
-    //         cout << "Enter the sender's private key: ";
-    //         cin >> sender;
-    //         cout << "Enter the receiver's public key: ";
-    //         cin >> receiver;
-    //         cout << "Enter the amount: ";
-    //         cin >> amount;
-    //         transact(sender, receiver, amount);
-    //     }
-    //     else if (choice == 3)
-    //     {
-    //         printBlocks();
-    //     }
-    //     else if (choice == 4)
-    //     {
-    //         int privateKey;
-    //         cout << "Enter the private key: ";
-    //         cin >> privateKey;
-    //         getHistory(privateKey);
-    //     }
-    //     else if (choice == 5)
-    //     {
-    //         int senderPrivateKey, receiverPublicKey;
-    //         string message;
-    //         cout << "Enter the sender's private key: ";
-    //         cin >> senderPrivateKey;
-    //         cout << "Enter the receiver's public key: ";
-    //         cin >> receiverPublicKey;
-    //         string buffer2;
-    //         getline(cin, buffer2);
-    //         cout << "Enter the message: ";
-    //         getline(cin, message);
-    //         sendMessage(senderPrivateKey, receiverPublicKey, message);
-    //     }
-    //     else if (choice == 6)
-    //     {
-    //         int privateKey;
-    //         cout << "Enter the private key: ";
-    //         cin >> privateKey;
-    //         receiveMessage(privateKey);
-    //     }
-    //     else if (choice == 7)
-    //     {
-    //         viewHashes();
-    //     }
-    //     else if (choice == 8)
-    //     {
-    //         cout<< "Validation Status: " <<validateChain() << endl;
-    //     }
-    //     else if (choice == 9)
-    //     {
-    //         break;
-    //     }
-    // }
 
     while (true)
     {
@@ -531,7 +535,13 @@ int main(int argc, char const *argv[])
             int privateKey;
             cout << "Enter the sender's private key: ";
             cin >> privateKey;
+            generateCoinBalance();
             viewBalanceOnBlock(privateKey);
+            for (int i = 0; i < N; i++)
+            {
+                coins[i] = 0;
+            }
+            coins[0] = 1000;
             cout << endl;
         }
 
@@ -541,22 +551,37 @@ int main(int argc, char const *argv[])
             int privateKey;
             cout << "Enter the sender's private key: ";
             cin >> privateKey;
+            generateCoinBalance();
             getHistory(privateKey);
+            for (int i = 0; i < N; i++)
+            {
+                coins[i] = 0;
+            }
+            coins[0] = 1000;
             cout << endl;
         }
 
         else if (choice == 8)
         {
             cout << endl;
-            cout << "Average time to find a block: " << (getNetworkDelay(0) / getChainLength()) << endl;
+            cout << "Average time to find a block: " << (getNetworkDelay(0) / getChainLength()) << "s" << endl;
             cout << endl;
+            // visitedNetwokTraversal.clear();
+            for (int i = 0; i < N; i++)
+            {
+                visitedNetwokTraversal[i] = false;
+            }
         }
 
         else if (choice == 9)
         {
             cout << endl;
-            cout << "Total network since the formation of genesis block: " << getNetworkDelay(0) << endl;
+            cout << "Total network since the formation of genesis block: " << getNetworkDelay(0) << "s" << endl;
             cout << endl;
+            for (int i = 0; i < N; i++)
+            {
+                visitedNetwokTraversal[i] = false;
+            }
         }
 
         else if (choice == 10)
@@ -596,7 +621,13 @@ int main(int argc, char const *argv[])
 
         else if (choice == 13)
         {
+            generateCoinBalance();
             printBlocks();
+            for (int i = 0; i < N; i++)
+            {
+                coins[i] = 0;
+            }
+            coins[0] = 1000;
         }
 
         else if (choice == 14)
